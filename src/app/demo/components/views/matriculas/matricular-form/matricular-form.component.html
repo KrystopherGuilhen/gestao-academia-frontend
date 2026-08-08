@@ -1,0 +1,24 @@
+<div class="surface-card shadow-2 p-4 border-round mb-4">
+    <h5 class="mt-0 mb-3">Matricular aluno em turma</h5>
+    <div class="formgrid grid">
+        <div class="field col-12 md:col-5">
+            <label>Aluno</label>
+            <p-dropdown [options]="alunos" optionLabel="label" optionValue="value" [(ngModel)]="alunoSelecionado"
+                placeholder="Selecione o aluno..." [filter]="true" filterBy="label" appendTo="body"
+                styleClass="w-full" [showClear]="true">
+            </p-dropdown>
+        </div>
+        <div class="field col-12 md:col-5">
+            <label>Turma (apenas turmas abertas)</label>
+            <p-dropdown [options]="turmas" optionLabel="label" optionValue="value" [(ngModel)]="turmaSelecionada"
+                placeholder="Selecione a turma..." [filter]="true" filterBy="label" appendTo="body"
+                styleClass="w-full" [showClear]="true">
+            </p-dropdown>
+        </div>
+        <div class="field col-12 md:col-2 flex align-items-end">
+            <button pButton label="Matricular" icon="pi pi-user-plus" class="w-full" [loading]="salvando"
+                (click)="matricular()">
+            </button>
+        </div>
+    </div>
+</div>

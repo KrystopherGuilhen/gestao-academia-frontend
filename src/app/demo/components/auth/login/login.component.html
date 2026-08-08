@@ -1,0 +1,72 @@
+<div class="surface-ground min-h-screen min-w-screen overflow-auto relative">
+
+    <!-- Alterna entre tema claro e escuro (o login fica fora do layout principal,
+         entao tem seu proprio botao de acesso rapido ao tema) -->
+    <button type="button" class="p-link" (click)="layoutService.toggleDarkMode()"
+        style="position: absolute; top: 1.5rem; right: 1.5rem; z-index: 10; width: 2.75rem; height: 2.75rem;
+               border-radius: 50%; display: flex; align-items: center; justify-content: center;
+               background: var(--surface-card); box-shadow: 0 2px 8px rgba(0,0,0,0.12); color: var(--text-color);">
+        <i class="pi" [ngClass]="layoutService.isDarkMode ? 'pi-sun' : 'pi-moon'" style="font-size: 1.2rem;"></i>
+    </button>
+
+    <div class="flex align-items-center justify-content-center min-h-screen px-3 py-6 gap-6 flex-wrap">
+
+        <!-- Ilustracao (some em telas pequenas) -->
+        <div class="hidden md:flex flex-column align-items-center" style="max-width: 380px;">
+            <img src="assets/branding/login-illustration.svg" alt="Ilustração de gestão acadêmica" class="w-full" />
+            <p class="text-600 text-center mt-3 text-lg">
+                Gestão de alunos, cursos, disciplinas, turmas e matrículas em um só lugar.
+            </p>
+        </div>
+
+        <!-- Card de login -->
+        <div class="flex flex-column align-items-center justify-content-center">
+            <div
+                style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(99, 102, 241, 0) 30%);">
+                <div class="w-full surface-card py-8 px-5 sm:px-8" style="border-radius: 53px; min-width: 380px;">
+
+                    <!-- Título / subtítulo -->
+                    <div class="text-center mb-5">
+                        <i class="pi pi-book text-primary mb-2" style="font-size: 2.5rem;"></i>
+                        <div class="text-color text-3xl font-medium mb-3">
+                            Gestão Acadêmica
+                        </div>
+                        <span class="text-600 font-medium">Faça o login para continuar</span>
+                    </div>
+
+                    <!-- Formulário de login -->
+                    <div>
+                        <label for="username" class="block text-color text-xl font-medium mb-2">
+                            Usuário
+                        </label>
+                        <input pInputText id="username" type="text" [(ngModel)]="username"
+                            placeholder="Usuário" class="w-full p-3 mb-4" (keyup.enter)="login()" />
+
+                        <label for="password" class="block text-color text-xl font-medium mb-2">
+                            Senha
+                        </label>
+                        <p-password id="password" [(ngModel)]="password" placeholder="Senha" [toggleMask]="true"
+                            [feedback]="false" (onInput)="onPasswordInput()" (keyup.enter)="login()" styleClass="w-full mb-4"
+                            inputStyleClass="p-3 w-full">
+                        </p-password>
+
+                        <div *ngIf="senhaIncorreta" class="text-red-500 mb-3 text-center">
+                            Usuário ou senha incorretos. Por favor, tente novamente.
+                        </div>
+
+                        <div *ngIf="erroSistema" class="text-red-500 mb-3 text-center">
+                            {{ erroMensagem }}
+                        </div>
+
+                        <button pButton pRipple label="Entrar" [loading]="carregando" class="w-full p-3 text-xl" (click)="login()">
+                        </button>
+
+                        <div class="text-center text-600 mt-4 text-sm">
+                            Usuário de demonstração: <b>admin</b> / senha: <b>admin123</b>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

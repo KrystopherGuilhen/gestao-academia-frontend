@@ -1,0 +1,79 @@
+<div class="grid">
+    <div class="col-12">
+        <h4 class="mb-4">Visão geral</h4>
+    </div>
+
+    <div class="col-12 md:col-6 lg:col-3" *ngFor="let card of cards">
+        <div class="surface-card shadow-2 p-3 border-round flex align-items-center justify-content-between">
+            <div>
+                <span class="block text-500 font-medium mb-2">{{ card.label }}</span>
+                <div class="text-color font-bold text-3xl">{{ card.valor }}</div>
+            </div>
+            <div class="flex align-items-center justify-content-center border-round"
+                 [ngClass]="card.cor" style="width: 3rem; height: 3rem;">
+                <i [class]="card.icone" style="font-size: 1.5rem;"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12" *ngIf="carregando">
+        <div class="surface-card shadow-2 p-4 border-round text-center text-600">
+            Carregando resumo...
+        </div>
+    </div>
+
+    <div class="col-12 lg:col-6" *ngIf="!carregando">
+        <div class="surface-card shadow-2 p-4 border-round">
+            <h5>Turmas cadastradas</h5>
+            <p-table [value]="ultimasTurmas" [rows]="6" responsiveLayout="scroll">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Código</th>
+                        <th>Disciplina</th>
+                        <th>Vagas</th>
+                        <th>Status</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-turma>
+                    <tr>
+                        <td>{{ turma.codigo }}</td>
+                        <td>{{ turma.nomeDisciplina }}</td>
+                        <td>{{ turma.vagasOcupadas }} / {{ turma.vagasTotais }}</td>
+                        <td>
+                            <span class="p-tag"
+                                  [ngClass]="{
+                                      'p-tag-success': turma.status === 'ABERTA',
+                                      'p-tag-warning': turma.status === 'FECHADA',
+                                      'p-tag-danger': turma.status === 'CANCELADA'
+                                  }">
+                                {{ turma.status }}
+                            </span>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="4" class="text-center text-600">Nenhuma turma cadastrada ainda.</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+
+    <div class="col-12 lg:col-6" *ngIf="!carregando">
+        <div class="surface-card shadow-2 p-4 border-round">
+            <h5>Atalhos</h5>
+            <div class="flex flex-column gap-2">
+                <a routerLink="/cadastro/matriculas" class="p-button p-component p-button-outlined w-full justify-content-start">
+                    <i class="pi pi-user-plus mr-2"></i> Matricular aluno em turma
+                </a>
+                <a routerLink="/cadastro/alunos" class="p-button p-component p-button-outlined w-full justify-content-start">
+                    <i class="pi pi-users mr-2"></i> Gerenciar alunos
+                </a>
+                <a routerLink="/cadastro/turmas" class="p-button p-component p-button-outlined w-full justify-content-start">
+                    <i class="pi pi-calendar mr-2"></i> Gerenciar turmas
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

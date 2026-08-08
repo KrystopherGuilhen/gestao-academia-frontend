@@ -1,0 +1,45 @@
+<div class="layout-topbar">
+    <a class="layout-topbar-logo" routerLink="">
+        <i class="pi pi-book" style="font-size: 1.75rem; margin-right: 0.5rem;"></i>
+        <span>Gestão Acadêmica</span>
+    </a>
+
+    <button #menubutton class="p-link layout-menu-button layout-topbar-button" (click)="layoutService.onMenuToggle()">
+        <i class="pi pi-bars"></i>
+    </button>
+
+    <button #topbarmenubutton class="p-link layout-topbar-menu-button layout-topbar-button"
+        (click)="layoutService.showProfileSidebar()">
+        <i class="pi pi-ellipsis-v"></i>
+    </button>
+
+    <div #topbarmenu class="layout-topbar-menu"
+        [ngClass]="{'layout-topbar-menu-mobile-active': layoutService.state.profileSidebarVisible}">
+
+        <!-- Alterna entre tema claro e escuro -->
+        <button class="p-link layout-topbar-button" pTooltip="Alternar tema claro/escuro" tooltipPosition="bottom"
+            (click)="layoutService.toggleDarkMode()">
+            <i class="pi" [ngClass]="layoutService.isDarkMode ? 'pi-sun' : 'pi-moon'"></i>
+            <span>{{ layoutService.isDarkMode ? 'Tema claro' : 'Tema escuro' }}</span>
+        </button>
+
+        <!-- Abre o painel de configurações de layout (escala, menu, etc.) -->
+        <button class="p-link layout-topbar-button" pTooltip="Configurações" tooltipPosition="bottom"
+            (click)="layoutService.showConfigSidebar()">
+            <i class="pi pi-cog"></i>
+            <span>Configurações</span>
+        </button>
+
+        <!-- Exibição do nome do usuário -->
+        <div style="display: flex; align-items: center; padding: 0 1rem; color: var(--text-color); gap: 0.5rem;">
+            <i class="pi pi-user" style="font-size: 1.25rem;"></i>
+            <span>Olá, {{ userName }}</span> <!-- Removeu o async pipe -->
+        </div>
+
+        <!-- Botão de logout existente -->
+        <button class="p-link layout-topbar-button" (click)="logout()">
+            <i class="pi pi-sign-out"></i>
+            <span>Sair</span>
+        </button>
+    </div>
+</div>

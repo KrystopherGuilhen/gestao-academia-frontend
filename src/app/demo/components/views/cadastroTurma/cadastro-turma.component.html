@@ -1,0 +1,9 @@
+<ga-cadastro-turma-view #view
+    (emitModalCadastro)="recebeModalCadastro(cadastroForm.modalProps)"
+    (emitDadosCadastro)="recebeDadosCadastro($event)">
+</ga-cadastro-turma-view>
+
+<ga-cadastro-turma-cadastro #cadastroForm [cadastro]="cadastro" [estado]="view.estado"
+    [tabelaProps]="view.tabelaProps" (emitCancelarCadastro)="recebeCancelarCadastro()"
+    (emiteNovoFormulario)="recebeConfirmacaoSalvar($event)">
+</ga-cadastro-turma-cadastro>

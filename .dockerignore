@@ -1,0 +1,32 @@
+# Ignora a pasta node_modules (as dependências serão instaladas dentro do container)
+node_modules/
+
+# Ignora a pasta dist (o build será gerado dentro do container)
+dist/
+
+# Ignora arquivos de configuração do Docker (evita cópias desnecessárias)
+Dockerfile
+.dockerignore
+
+# Ignora arquivos de controle de versão
+.git/
+.gitignore
+
+# Ignora arquivos de ambiente (se houver)
+.env
+.env.local
+
+# Ignora arquivos de log e cache
+npm-debug.log
+yarn-error.log
+.cache/
+
+# Ignora arquivos de IDE (se necessário)
+.idea/
+.vscode/
+
+# Ignora arquivos de cobertura de testes (se houver)
+coverage/
+
+# Ignora arquivos de configuração local (se houver)
+angular.json.local

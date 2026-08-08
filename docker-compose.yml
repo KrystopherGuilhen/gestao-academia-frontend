@@ -1,0 +1,42 @@
+# Sobe apenas o frontend. Pensado para funcionar em conjunto com o backend
+# (repositorio "gestao-academia-backend"), que roda separadamente e expõe
+# seu proprio docker-compose.yml.
+#
+# Os dois se conectam atraves de uma rede Docker externa compartilhada,
+# que precisa existir ANTES de subir qualquer um dos dois:
+#
+#   docker network create gestao-academia-network
+#
+# (se a rede ja existir, o comando acima so vai avisar que ja existe — sem problema)
+#
+# Depois, com o backend ja rodando (docker compose up no repositorio do backend,
+# usando a mesma rede), suba este frontend:
+#
+#   docker compose up --build
+#
+# Por padrao, o Nginx deste container faz proxy reverso de /api/* para o
+# servico "backend" (nome do servico do outro repositorio) dentro da rede
+# compartilhada — o navegador do usuario so fala com este frontend, sem CORS.
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gestao-academia-frontend
+    restart: always
+    ports:
+      - "${FRONTEND_PORT:-4200}:80"
+    environment:
+      PRODUCTION: "true"
+      BASE_URL: "/"
+      # Nome do servico do backend dentro da rede Docker compartilhada.
+      # Se voce renomeou o servico no docker-compose do backend, ajuste aqui.
+      BACKEND_HOST: "${BACKEND_HOST:-backend}"
+      BACKEND_PORT: "${BACKEND_PORT:-8080}"
+    networks:
+      - gestao-academia-network
+
+networks:
+  gestao-academia-network:
+    external: true

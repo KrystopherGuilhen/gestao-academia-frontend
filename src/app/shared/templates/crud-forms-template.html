@@ -1,0 +1,352 @@
+<p-dialog [header]="modalProps.titulo" [modal]="true" [(visible)]="modalProps.exibeModal" [draggable]="false"
+    [resizable]="false" [style]="{ width: modalProps.largura}" [closable]="false" styleClass="shadow-3" appendTo="body">
+    <ng-template pTemplate="content">
+        <div class="formgrid grid">
+            @if (modalProps.modalCadastro)
+            { @for (item of formCadastro; track $index) {
+            <div *ngIf="item.visivel" [class]="'field col-' + item.colSpan.toString()">
+                <!-- Label com indicação de campo obrigatório -->
+                <label *ngIf="item.descricao">
+                    {{ item.descricao }}:
+                    @if (item.obrigatorio && estado !== 0 && campoEstaVazio(item)) {
+                    <span class="text-danger">*</span>
+                    }
+                </label>
+
+                @if (item.tipoDado === 'dinamico') {
+                <div class="dynamic-form-container">
+                    @for (input of cadastro[item.formModel]; track $index; let i = $index) {
+                    <div class="dynamic-input-group flex align-items-center gap-2 mb-3">
+                        <input type="text" pInputText [(ngModel)]="cadastro[item.formModel][i]"
+                            class="w-full p-inputtext-sm" [placeholder]=" item.optInput?.placeholder + ' ' + (i + 1)"
+                            [disabled]="estado === 0" [required]="item.obrigatorio" style="flex: 1">
+
+                        @if (estado === 1 || estado === 2) {
+                        <button pButton type="button" icon="pi pi-times"
+                            class="p-button-rounded p-button-text p-button-sm ml-2"
+                            style="color: #dc2626; border: 1px solid #dc2626;"
+                            (click)="removerCampo(item.formModel, i)">
+                        </button>
+                        }
+                    </div>
+                    }
+                    @if (estado === 1 || estado === 2) {
+                    <button pButton type="button" icon="pi pi-plus"
+                        class="p-button-outlined p-button-success w-full mt-2"
+                        [label]="item.optInput?.text || 'Nova' + item.optInput?.text"
+                        (click)="adicionarCampo(item.formModel)" [disabled]="estado === 0"
+                        style="border-style: dashed;">
+                    </button>
+                    }
+                </div>
+                }
+
+                @if (item.tipoDado === 'texto') {
+                <input type="text" pInputText [(ngModel)]="cadastro[item.formModel]" class="w-full" appendTo="body"
+                    [disabled]="estado === 0" [mask]="item.optInput?.mask" [placeholder]="item.optInput?.placeholder"
+                    [required]="item.obrigatorio" (input)="item.optInput?.onInput?.($event)"
+                    (blur)="item.optInput?.onBlur?.($event)" />
+                }
+
+                @if (item.tipoDado === 'textoEstatico') {
+                <div class="texto-estatico" [ngStyle]="parseStyle(item.optInput?.estilo)">
+                    {{ item.optInput?.textoEstatico }}
+                </div>
+                }
+
+                @if (item.tipoDado === 'textarea') {
+                <div class="field-container">
+                    <textarea [(ngModel)]="cadastro[item.formModel]" [rows]="item.optInput?.rows || 3"
+                        [cols]="item.optInput?.cols || 20" [autoResize]="item.optInput?.autoResize || true"
+                        [disabled]="estado === 0" [placeholder]="item.optInput?.placeholder"
+                        [required]="item.obrigatorio" class="w-full" pInputTextarea>
+                    </textarea>
+                </div>
+                }
+
+                @if (item.tipoDado === 'numerico') {
+                <p-inputNumber *ngIf="item.optInput.modoNumerico === 'decimal'" [(ngModel)]="cadastro[item.formModel]"
+                    [mode]="item.optInput.modoNumerico" class="w-full" styleClass="w-full" appendTo="body"
+                    [disabled]="estado === 0" [required]="item.obrigatorio">
+                </p-inputNumber>
+
+                <p-inputNumber *ngIf="item.optInput.modoNumerico === 'currency'" [(ngModel)]="cadastro[item.formModel]"
+                    [mode]="item.optInput.modoNumerico" [currency]="item.optInput.monetario"
+                    [locale]="item.optInput.locale" class="w-full" styleClass="w-full" appendTo="body"
+                    [disabled]="estado === 0" [required]="item.obrigatorio">
+                </p-inputNumber>
+                }
+
+                @if (item.tipoDado === 'lista') {
+                <!-- Renderiza MultiSelect se 'selecaoMultipla' estiver habilitado -->
+                <p-multiSelect *ngIf="item.optInput.selecaoMultipla" [options]="item.optInput.lista"
+                    [optionLabel]="item.optInput.listaLabel" [optionValue]="item.optInput.listaValue"
+                    [(ngModel)]="cadastro[item.formModel]" [placeholder]="item.optInput.placeholder" appendTo="body"
+                    styleClass="w-full" [disabled]="estado === 0" (onChange)="item.optInput.onChange?.($event)" ø
+                    [required]="item.obrigatorio">
+                </p-multiSelect>
+
+                <!-- Renderiza Dropdown se 'selecaoMultipla' estiver desabilitado -->
+                <p-dropdown *ngIf="!item.optInput.selecaoMultipla" [options]="item.optInput.lista"
+                    [optionLabel]="item.optInput.listaLabel" [optionValue]="item.optInput.listaValue"
+                    [(ngModel)]="cadastro[item.formModel]" [placeholder]="item.optInput.placeholder" [filter]="true"
+                    [filterBy]="item.optInput.filterBy || item.optInput.listaLabel" appendTo="body" styleClass="w-full"
+                    [showClear]="true" (onClear)="limparCampo(item.formModel)" [disabled]="estado === 0"
+                    (onChange)="item.optInput.onChange?.($event)" [required]="item.obrigatorio">
+                </p-dropdown>
+                }
+
+                @if (item.tipoDado === 'data') {
+                <p-calendar [(ngModel)]="cadastro[item.formModel]" [dateFormat]="item.optInput.dateFormat"
+                    [showIcon]="item.optInput.dateIcon" [readonlyInput]="false" styleClass="w-full"
+                    [disabled]="estado === 0" [showButtonBar]="true" [showIcon]="true" appendTo="body"
+                    [required]="item.obrigatorio" [minDate]="item.optInput.minDate" [maxDate]="item.optInput.maxDate"
+                    (onSelect)="item.optInput.onChange?.($event)">
+                </p-calendar>
+                }
+
+                @if (item.tipoDado === 'logico')
+                { @if (item.optInput.items === undefined || item.optInput.items.length <= 0) {
+                    <div class="flex align-items-center gap-2 mt-2">
+                        <p-checkbox [(ngModel)]="cadastro[item.formModel]" [binary]="true"
+                            (onChange)="item.optInput.onChange(cadastro[item.formModel])"
+                            [disabled]="estado === 0 || item.optInput?.disabled">
+                        </p-checkbox>
+                        <label class="m-0" [innerHTML]="item.optInput.text"></label>
+                    </div>
+                    }
+                    @else {
+                    <div class="flex flex-column gap-2 mt-2">
+                        @for (checkbox of item.optInput.items; track $index) {
+                        <div class="flex align-items-center gap-2">
+                            <p-checkbox [inputId]="checkbox.itemValue" [(ngModel)]="cadastro[item.formModel]"
+                                [binary]="true" (onChange)="item.optInput.onChange(cadastro[item.formModel])"
+                                [disabled]="estado === 0 || item.optInput?.disabled">
+                            </p-checkbox>
+                            <label class="m-0" [innerHTML]="checkbox.text"></label>
+                        </div>
+                        }
+                    </div>
+                    }
+                    }
+                    @if (item.tipoDado === 'radio') { @if (item.optInput.items === undefined ||
+                    item.optInput.items.length <= 0) { <p-radioButton class="mb-2"
+                        [(ngModel)]="cadastro[item.formModel]"
+                        (onClick)="item.optInput.onClick(cadastro[item.formModel])" [disabled]="estado === 0"
+                        [required]="item.obrigatorio">
+                        </p-radioButton>
+                        <label class="ml-2" [innerHTML]="item.optInput.text"></label>
+                        } @else { @for (radiobutton of item.optInput.items; track $index) {
+                        <p-radioButton class="ml-2 mb-2" [inputId]="radiobutton.itemValue"
+                            [value]="radiobutton.itemValue" [(ngModel)]="cadastro[item.formModel]"
+                            (onClick)="item.optInput.onClick(cadastro[item.formModel])" [disabled]="estado === 0"
+                            [required]="item.obrigatorio">
+                        </p-radioButton>
+                        <label class="ml-2 mb-2" [innerHTML]="radiobutton.text"></label>
+                        } } }
+                        @if (item.tipoDado === 'fileupload' && cadastro.preencherArquivo) {
+                        <div class="flex surface-200 border-round p-2">
+                            @if (item.optInput.fileUploadHint.visivel) {
+                            <div class="w-9">
+                                @for (fileHint of item.optInput.fileUploadHint.hints; track $index) {
+                                <legend class="text-sm mt-2 mb-2" [innerHTML]="fileHint"></legend>
+                                }
+                            </div>
+                            }
+                            <div
+                                [class]="item.optInput.fileUploadHint.visivel ? 'w-3 flex justify-content-end' : 'w-auto'">
+                                <p-button *ngIf="item.optInput.fileUploadBtn.visivel" icon="pi pi-file"
+                                    [outlined]="true" size="small" severity="secondary"
+                                    [pTooltip]="item.optInput.fileUploadBtn.toolTip"
+                                    (onClick)="item.optInput.fileUploadBtn.onClick($event)">
+                                </p-button>
+                            </div>
+                        </div>
+
+                        <p-fileUpload chooseLabel="Arquivo" cancelLabel="Cancelar" chooseIcon="pi pi-upload"
+                            styleClass="mt-2" customUpload="true" (onSelect)="onFileSelect($event)"
+                            (uploadHandler)="onUpload($event)">
+                        </p-fileUpload>
+                        }
+                        @if (item.tipoDado === 'fileupload' && !cadastro.preencherArquivo) {
+                        <div class="col-12 p-fluid" style="max-width: 800px; width: 100%">
+                            <div class="p-grid p-nogutter p-col-12">
+                                <p-fileUpload [chooseLabel]="'Selecionar Arquivo'" cancelLabel="Remover Todos"
+                                    chooseIcon="pi pi-file-import" [multiple]="true" mode="advanced" customUpload="true"
+                                    [showUploadButton]="false" [showCancelButton]="cadastro[item.formModel]?.length > 0"
+                                    (onSelect)="onFileDadosSelect($event, item.formModel, item)"
+                                    (onClear)="onFileDadosRemove(item.formModel)" class="w-full"
+                                    [ngStyle]="{ 'width': '100%', 'max-width': '800px' }"
+                                    [accept]="getAcceptedTypes(item)">
+
+                                    <ng-template pTemplate="header" *ngIf="item.optInput?.fileUploadHint?.visivel">
+                                        <div class="p-text-sm p-p-2">
+                                        </div>
+                                    </ng-template>
+
+                                    <ng-template pTemplate="content">
+                                        <div class="p-col-12" style="min-height: 120px">
+                                            @if (cadastro[item.formModel]?.length > 0) {
+
+                                            <div class="instrucoes-internas">
+                                                {{ item.optInput.fileUploadHint.instrucoes }}
+                                            </div>
+
+                                            <div class="file-list-container"
+                                                style="border: 1px solid #dee2e6; border-radius: 4px; padding: 8px">
+                                                @for (file of cadastro[item.formModel]; track $index) {
+                                                <div class="p-d-flex p-ai-center p-p-2 p-mb-1"
+                                                    style="background: #f8f9fa; border-radius: 3px">
+
+                                                    <!-- Imagens -->
+                                                    @if (file.mimeType?.startsWith('image/')) {
+                                                    <img [src]="file.objectURL || ('data:' + file.mimeType + ';base64,' + file.base64)"
+                                                        alt="Preview" style="width:50px; height:auto; margin-right:8px"
+                                                        (error)="handleImageError($event)">
+                                                    }
+
+                                                    <!-- PDF -->
+                                                    @if (file.mimeType === 'application/pdf') {
+                                                    <i class="pi pi-file-pdf p-mr-2"
+                                                        style="color: #ff0000; font-size: 1.5rem"></i>
+                                                    }
+
+                                                    <!-- Outros tipos -->
+                                                    @if (!file.mimeType?.startsWith('image/') && file.mimeType !==
+                                                    'application/pdf') {
+                                                    <i class="pi pi-file p-mr-2" style="font-size: 1.5rem"></i>
+                                                    }
+
+                                                    <!-- Nome e tamanho -->
+                                                    <div class="p-d-flex p-flex-column">
+                                                        <span class="p-text-truncate" style="max-width: 400px">{{
+                                                            file.name }}</span>
+                                                        <small class="p-text-secondary">{{ file.size ?
+                                                            formatFileSize(file.size) : 'Tamanho desconhecido'
+                                                            }}</small>
+                                                    </div>
+
+                                                    <!-- Botão de remoção -->
+                                                    <button type="button" class="p-button-text p-ml-auto p-text-danger"
+                                                        (click)="removeSingleFile(item.formModel, $index)">
+                                                        <i class="pi pi-times"></i>
+                                                    </button>
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                            @else {
+                                            <div class="instrucoes-container">
+                                                <i class="pi pi-cloud-upload p-mr-2"></i>
+                                                <div class="instrucoes-texto">
+                                                    {{ item.optInput.fileUploadHint.instrucoes }}
+                                                </div>
+                                            </div>
+                                            }
+                                        </div>
+                                    </ng-template>
+                                </p-fileUpload>
+                            </div>
+                            <!-- Mensagem de erro para fileupload obrigatório -->
+                            <div *ngIf="item.obrigatorio && (!cadastro[item.formModel] || cadastro[item.formModel].length === 0)"
+                                class="text-danger">
+                                Arquivo obrigatório.
+                            </div>
+                        </div>
+                        }
+            </div>
+            } }
+            @else if (modalProps.modalImpressao) {
+            <!-- Modal de Impressão -->
+            @for (item of formImpressao; track $index) {
+            <div *ngIf="item.visivel" [class]="'field col-' + item.colSpan.toString()">
+                <label
+                    [innerHTML]="item.descricao + (item.obrigatorio ? ' <span class=\'text-danger\'>*</span>' : '') + ':'"></label>
+
+                @if (item.tipoDado === 'texto') {
+                <input type="text" pInputText [(ngModel)]="impressao[item.formModel]" class="w-full" appendTo="body"
+                    [disabled]="estado === 0" [mask]="item.optInput?.mask" [placeholder]="item.optInput?.placeholder"
+                    [required]="item.obrigatorio" />
+                }
+
+                @if (item.tipoDado === 'lista') {
+                <!-- Renderiza MultiSelect se 'selecaoMultipla' estiver habilitado -->
+                <p-multiSelect *ngIf="item.optInput.selecaoMultipla" [options]="item.optInput.lista"
+                    [optionLabel]="item.optInput.listaLabel" [optionValue]="item.optInput.listaValue"
+                    [(ngModel)]="impressao[item.formModel]" [placeholder]="item.optInput.placeholder" appendTo="body"
+                    styleClass="w-full" [disabled]="estado === 0" (onChange)="item.optInput.onChange?.($event)"
+                    [required]="item.obrigatorio">
+                </p-multiSelect>
+
+                <!-- Renderiza Dropdown se 'selecaoMultipla' estiver desabilitado -->
+                <p-dropdown *ngIf="!item.optInput.selecaoMultipla" [options]="item.optInput.lista"
+                    [optionLabel]="item.optInput.listaLabel" [optionValue]="item.optInput.listaValue"
+                    [(ngModel)]="impressao[item.formModel]" [placeholder]="item.optInput.placeholder" [filter]="true"
+                    [filterBy]="item.optInput.filterBy || item.optInput.listaLabel" appendTo="body" styleClass="w-full"
+                    [disabled]="estado === 0" (onChange)="item.optInput.onChange?.($event)"
+                    [required]="item.obrigatorio">
+                </p-dropdown>
+                }
+            </div>
+            } }
+            @else {
+            @for (item of formFiltros; track $index) {
+            <div [class]="'field col-' + item.colSpan.toString()">
+                <label
+                    [innerHTML]="item.descricao + (item.obrigatorio ? ' <span class=\'text-danger\'>*</span>' : '') + ':'"></label>
+                @if (item.tipoDado === 'texto') {
+                <input type="text" pInputText [(ngModel)]="filtros[item.formModel]" class="w-full" appendTo="body"
+                    [mask]="item.optInput?.mask" [placeholder]="item.optInput?.placeholder"
+                    [required]="item.obrigatorio" />
+                }
+                @if (item.tipoDado === 'numerico') {
+                <p-inputNumber [(ngModel)]="filtros[item.formModel]" [mode]="item.optInput.modoNumerico"
+                    [currency]="item.optInput.monetario" [locale]="item.optInput.locale" styleClass="w-full"
+                    appendTo="body" [required]="item.obrigatorio">
+                </p-inputNumber>
+                }
+                @if (item.tipoDado === 'lista') {
+                <!-- Renderiza MultiSelect se 'selecaoMultipla' estiver habilitado -->
+                <p-multiSelect *ngIf="item.optInput.selecaoMultipla" [options]="item.optInput.lista"
+                    [optionLabel]="item.optInput.listaLabel" [optionValue]="item.optInput.listaValue"
+                    [(ngModel)]="filtros[item.formModel]" [placeholder]="item.optInput.placeholder" appendTo="body"
+                    styleClass="w-full" [required]="item.obrigatorio">
+                </p-multiSelect>
+
+                <!-- Renderiza Dropdown se 'selecaoMultipla' estiver desabilitado -->
+                <p-dropdown *ngIf="!item.optInput.selecaoMultipla" [options]="item.optInput.lista"
+                    [optionLabel]="item.optInput.listaLabel" [optionValue]="item.optInput.listaValue"
+                    [(ngModel)]="filtros[item.formModel]" [placeholder]="item.optInput.placeholder" [filter]="true"
+                    [filterBy]="item.optInput.filterBy || item.optInput.listaLabel" [showClear]="true" appendTo="body"
+                    styleClass="w-full" [required]="item.obrigatorio">
+                </p-dropdown>
+                }
+                @if (item.tipoDado === 'data') {
+                <p-calendar [(ngModel)]="filtros[item.formModel]" [dateFormat]="item.optInput.dateFormat"
+                    [showIcon]="item.optInput.dateIcon" [readonlyInput]="false" [showIcon]="true" [showButtonBar]="true"
+                    styleClass="w-full" appendTo="body" [required]="item.obrigatorio" [minDate]="item.optInput.minDate"
+                    [maxDate]="item.optInput.maxDate">
+                </p-calendar>
+                }
+            </div>
+            } }
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        @if (!modalProps.fileUpload) {
+        @if (modalProps.modalCadastro) {
+        <p-button *ngIf="estado !== 0" label="Salvar" icon="pi pi-check" [text]="true" (onClick)="salvar()"
+            [disabled]="!todosCamposValidos()"
+            [ptTooltip]="!todosCamposValidos() ? 'Preencha todos os campos obrigatórios' : ''">
+        </p-button>
+        } @else if (modalProps.modalImpressao) {
+        <p-button label="Imprimir" icon="pi pi-print" [text]="true" (onClick)="imprimir()"></p-button>
+        } @else {
+        <p-button label="Limpar" icon="pi pi-trash" [text]="true" severity="danger" (onClick)="limparFormulario()">
+        </p-button>
+        <p-button label="Filtrar" icon="pi pi-filter" [text]="true" (onClick)="filtrar()"></p-button>
+        } }
+        <p-button label="Cancelar" icon="pi pi-ban" [text]="true" (onClick)="cancelar()"></p-button>
+    </ng-template>
+</p-dialog>
