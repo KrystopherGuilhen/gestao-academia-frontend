@@ -20,6 +20,7 @@
 
 services:
   frontend:
+    image: SEU_USUARIO_DOCKERHUB/gestao-academia-frontend:latest
     build:
       context: .
       dockerfile: Dockerfile

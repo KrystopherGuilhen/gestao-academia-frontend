@@ -18,6 +18,7 @@ alunos, cursos, disciplinas e turmas, e o fluxo de matrícula de alunos em turma
 - [Pré-requisitos e instalação das tecnologias](#pré-requisitos-e-instalação-das-tecnologias)
 - [Uso em conjunto com o backend](#uso-em-conjunto-com-o-backend)
 - [Como executar](#como-executar)
+- [Build e publicação da imagem Docker](#build-e-publicação-da-imagem-docker)
 - [Variáveis de ambiente / configuração de runtime](#variáveis-de-ambiente--configuração-de-runtime)
 - [Funcionalidades](#funcionalidades)
 - [Decisões técnicas](#decisões-técnicas)
@@ -174,6 +175,60 @@ npm start
 ```bash
 npm run build
 ```
+
+---
+
+## Build e publicação da imagem Docker
+
+Esta seção é para quem vai **gerar e publicar** a imagem (manter o projeto), não para quem só quer
+rodar — se você só quer rodar, veja [Como executar](#como-executar).
+
+O `Dockerfile` deste projeto faz o `npm install` e o `npm run build` sozinho dentro do container (build
+multi-stage: uma etapa com Node completo compila o Angular, a etapa final só leva os arquivos
+estáticos gerados e o Nginx). Não precisa rodar `npm install`/`npm run build` manualmente antes.
+
+### 1. Gerar a imagem localmente
+
+```bash
+cd gestao-academia-frontend
+docker build -t gestao-academia-frontend:latest .
+```
+
+### 2. Login no Docker Hub
+
+```bash
+docker login
+```
+
+### 3. Taguear a imagem (troque `SEU_USUARIO_DOCKERHUB` pelo seu usuário no Docker Hub)
+
+```bash
+docker tag gestao-academia-frontend:latest SEU_USUARIO_DOCKERHUB/gestao-academia-frontend:latest
+```
+
+### 4. Enviar para o Docker Hub
+
+```bash
+docker push SEU_USUARIO_DOCKERHUB/gestao-academia-frontend:latest
+```
+
+### Como quem for usar consegue rodar sem buildar nada
+
+O `docker-compose.yml` deste repositório já referencia `SEU_USUARIO_DOCKERHUB/gestao-academia-frontend:latest`
+no campo `image` do serviço `frontend` (ajuste esse nome de usuário no arquivo depois de publicar a
+sua imagem). Assim, quem for usar o projeto tem as duas opções, com o **mesmo** `docker-compose.yml`:
+
+```bash
+# Opção A — baixar a imagem pronta do Docker Hub (não builda nada localmente)
+docker compose pull
+docker compose up
+
+# Opção B — buildar localmente a partir do código-fonte (ignora a imagem do Hub)
+docker compose up --build
+```
+
+> Repita os mesmos 4 passos no repositório do backend (`gestao-academia-backend`) para gerar e
+> publicar a imagem dele também.
 
 ---
 
